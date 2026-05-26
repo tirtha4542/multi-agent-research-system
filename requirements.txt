@@ -1,0 +1,93 @@
+# =========================
+# CORE LANGCHAIN PACKAGES
+# =========================
+langchain
+langchain-core
+langchain-community
+langchain-text-splitters
+langchain-openai
+langchain-mistralai
+langgraph
+langserve
+
+# =========================
+# AGENTS + LCEL + RUNNABLES
+# =========================
+pydantic
+typing-extensions
+
+# =========================
+# MISTRAL API
+# =========================
+mistralai
+
+# =========================
+# SEARCH TOOL (TAVILY)
+# =========================
+tavily-python
+
+# =========================
+# WEB SCRAPING
+# =========================
+beautifulsoup4
+requests
+lxml
+html5lib
+
+# =========================
+# VECTOR DATABASE / EMBEDDING
+# =========================
+faiss-cpu
+chromadb
+
+# =========================
+# ENVIRONMENT VARIABLES
+# =========================
+python-dotenv
+
+# =========================
+# DATA PROCESSING
+# =========================
+pandas
+numpy
+
+# =========================
+# FRONTEND
+# =========================
+streamlit
+
+# =========================
+# TOKEN COUNTING
+# =========================
+tiktoken
+
+# =========================
+# ASYNC SUPPORT
+# =========================
+aiohttp
+httpx
+
+# =========================
+# DOCUMENT LOADERS
+# =========================
+pypdf
+unstructured
+
+# =========================
+# LOGGING / DEBUGGING
+# =========================
+rich
+
+# =========================
+# OPTIONAL BUT VERY USEFUL
+# =========================
+sentence-transformers
+duckduckgo-search
+wikipedia
+arxiv
+
+# =========================
+# NOTEBOOK SUPPORT
+# =========================
+jupyter
+ipykernel

@@ -91,3 +91,5 @@ arxiv
 # =========================
 jupyter
 ipykernel
+fastapi 
+uvicorn

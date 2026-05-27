@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ResearchMind · AI Research Pipeline</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Cabinet+Grotesk:wght@400;500;600;700;800&family=Fira+Code:wght@300;400&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        /* ═══════════════════════════════════════════════════════════════
+   TOKENS & RESET
+═══════════════════════════════════════════════════════════════ */
+        :root {
+            --bg: #05080f;
+            --bg2: #0a0f1c;
+            --bg3: #0e1526;
+            --surface: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+
+            --ink: #dde3f0;
+            --ink2: #8892a8;
+            --ink3: #4a5268;
+
+            --cyan: #00e5c8;
+            --cyan-dim: rgba(0, 229, 200, 0.12);
+            --cyan-glow: rgba(0, 229, 200, 0.25);
+            --gold: #f5c842;
+            --gold-dim: rgba(245, 200, 66, 0.1);
+            --crimson: #ff4d6a;
+            --violet: #9d7fff;
+
+            --r: 10px;
+            --r2: 16px;
+            --mono: 'Fira Code', monospace;
+            --sans: 'Cabinet Grotesk', sans-serif;
+            --serif: 'Instrument Serif', serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--sans);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   ANIMATED BACKGROUND CANVAS
+═══════════════════════════════════════════════════════════════ */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════════════ */
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 2rem 6rem;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════════════ */
+        .hero {
+            padding: 7rem 0 4.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.18em;
+            color: var(--cyan);
+            border: 1px solid var(--cyan-dim);
+            background: var(--cyan-dim);
+            padding: 0.35rem 0.9rem;
+            border-radius: 100px;
+            margin-bottom: 2rem;
+            animation: fadeDown 0.6s ease both;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--cyan);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.7);
+            }
+        }
+
+        .hero-title {
+            font-family: var(--serif);
+            font-size: clamp(3.2rem, 7vw, 5.8rem);
+            font-weight: 400;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.2rem;
+            animation: fadeDown 0.6s 0.1s ease both;
+        }
+
+        .hero-title em {
+            font-style: italic;
+            background: linear-gradient(120deg, var(--cyan) 0%, var(--violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-size: 1rem;
+            color: var(--ink2);
+            max-width: 480px;
+            margin: 1.2rem auto 0;
+            line-height: 1.65;
+            animation: fadeDown 0.6s 0.2s ease both;
+        }
+
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   SEARCH BOX
+═══════════════════════════════════════════════════════════════ */
+        .search-wrap {
+            position: relative;
+            max-width: 680px;
+            margin: 3rem auto 0;
+            animation: fadeDown 0.6s 0.3s ease both;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 4px var(--cyan-dim), 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .search-icon {
+            padding: 0 1.1rem 0 1.4rem;
+            color: var(--ink3);
+            flex-shrink: 0;
+            font-size: 1.1rem;
+        }
+
+        #topic-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--ink);
+            font-family: var(--sans);
+            font-size: 1.05rem;
+            padding: 1.1rem 0.5rem;
+            caret-color: var(--cyan);
+        }
+
+        #topic-input::placeholder {
+            color: var(--ink3);
+        }
+
+        .run-btn {
+            margin: 6px;
+            padding: 0.75rem 1.6rem;
+            background: linear-gradient(135deg, #00c9b0 0%, #008aff 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-family: var(--sans);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform 0.15s, opacity 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(0, 200, 176, 0.3);
+        }
+
+        .run-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(0, 200, 176, 0.45);
+        }
+
+        .run-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .run-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   PIPELINE TRACK
+═══════════════════════════════════════════════════════════════ */
+        .pipeline-section {
+            margin-top: 4rem;
+        }
+
+        .section-label {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--ink3);
+            margin-bottom: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .stages-track {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .stage-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r2);
+            padding: 1.3rem 1.2rem;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .stage-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--cyan-dim), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .stage-card.active::before {
+            opacity: 1;
+        }
+
+        .stage-card.active {
+            border-color: var(--cyan);
+        }
+
+        .stage-card.done {
+            border-color: rgba(0, 229, 200, 0.35);
+        }
+
+        .stage-card.pending {
+            opacity: 0.38;
+        }
+
+        .stage-num {
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            color: var(--ink3);
+            letter-spacing: 0.12em;
+            margin-bottom: 0.6rem;
+        }
+
+        .stage-icon {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            transition: transform 0.3s;
+        }
+
+        .stage-card.active .stage-icon {
+            animation: iconBounce 1.2s infinite;
+        }
+
+        @keyframes iconBounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .stage-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 0.25rem;
+        }
+
+        .stage-desc {
+            font-size: 0.72rem;
+            color: var(--ink3);
+            line-height: 1.5;
+            font-family: var(--mono);
+        }
+
+        .stage-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.6rem;
+            font-family: var(--mono);
+            letter-spacing: 0.06em;
+            padding: 0.18rem 0.5rem;
+            border-radius: 100px;
+        }
+
+        .status-pending {
+            background: var(--border);
+            color: var(--ink3);
+        }
+
+        .status-active {
+            background: var(--cyan-dim);
+            color: var(--cyan);
+        }
+
+        .status-cooldown {
+            background: var(--gold-dim);
+            color: var(--gold);
+        }
+
+        .status-done {
+            background: rgba(0, 229, 200, 0.1);
+            color: var(--cyan);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════════════════════════ */
+        .progress-wrap {
+            margin-top: 1.6rem;
+            height: 3px;
+            background: var(--border);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 100px;
+            background: linear-gradient(90deg, var(--cyan), var(--violet));
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 60px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5));
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            from {
+                transform: translateX(-60px);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(60px);
+                opacity: 0;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   STATUS LINE
+═══════════════════════════════════════════════════════════════ */
+        .status-line {
+            text-align: center;
+            margin-top: 1rem;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--ink3);
+            min-height: 1.2rem;
+            transition: color 0.3s;
+        }
+
+        .status-line.active {
+            color: var(--cyan);
+        }
+
+        .status-line.cooldown {
+            color: var(--gold);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   COOLDOWN TIMER
+═══════════════════════════════════════════════════════════════ */
+        .cooldown-bar {
+            display: none;
+            margin-top: 0.8rem;
+            align-items: center;
+            gap: 10px;
+            padding: 0.6rem 1rem;
+            background: var(--gold-dim);
+            border: 1px solid rgba(245, 200, 66, 0.15);
+            border-radius: var(--r);
+        }
+
+        .cooldown-bar.visible {
+            display: flex;
+        }
+
+        .cooldown-label {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            color: var(--gold);
+            flex: 1;
+        }
+
+        .cooldown-track {
+            flex: 2;
+            height: 3px;
+            background: rgba(245, 200, 66, 0.15);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .cooldown-fill {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 100px;
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   RESULTS SECTION
+═══════════════════════════════════════════════════════════════ */
+        .results-section {
+            margin-top: 3rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .result-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r2);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        .result-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.9rem 1.2rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .result-card-header:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .result-card-icon {
+            font-size: 1rem;
+        }
+
+        .result-card-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--ink);
+            flex: 1;
+        }
+
+        .result-card-tag {
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            color: var(--ink3);
+            letter-spacing: 0.08em;
+        }
+
+        .result-card-chevron {
+            color: var(--ink3);
+            font-size: 0.75rem;
+            transition: transform 0.25s;
+        }
+
+        .result-card.expanded .result-card-chevron {
+            transform: rotate(180deg);
+        }
+
+        .result-card-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .result-card.expanded .result-card-body {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result-card-content {
+            padding: 1rem 1.2rem;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            line-height: 1.8;
+            color: var(--ink2);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* Scrollbar for result body */
+        .result-card-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .result-card-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .result-card-body::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 4px;
+        }
+
+        /* ─── Report Card ─── */
+        .report-card {
+            background: linear-gradient(135deg, rgba(157, 127, 255, 0.06) 0%, rgba(0, 229, 200, 0.03) 100%);
+            border: 1px solid rgba(157, 127, 255, 0.2);
+            border-radius: var(--r2);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s, transform 0.5s;
+            margin-bottom: 14px;
+        }
+
+        .report-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .report-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid rgba(157, 127, 255, 0.12);
+        }
+
+        .report-card-header h2 {
+            font-family: var(--serif);
+            font-size: 1.25rem;
+            font-weight: 400;
+            font-style: italic;
+            color: var(--violet);
+            flex: 1;
+        }
+
+        .report-card-body {
+            padding: 1.4rem 1.5rem;
+            font-size: 0.88rem;
+            line-height: 1.85;
+            color: var(--ink2);
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        /* ─── Critique Card ─── */
+        .critique-card {
+            background: linear-gradient(135deg, rgba(0, 229, 200, 0.05) 0%, rgba(0, 138, 255, 0.03) 100%);
+            border: 1px solid rgba(0, 229, 200, 0.18);
+            border-radius: var(--r2);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s, transform 0.5s;
+            margin-bottom: 14px;
+        }
+
+        .critique-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .critique-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 229, 200, 0.1);
+        }
+
+        .critique-card-header h2 {
+            font-family: var(--serif);
+            font-size: 1.25rem;
+            font-weight: 400;
+            font-style: italic;
+            color: var(--cyan);
+            flex: 1;
+        }
+
+        .critique-card-body {
+            padding: 1.4rem 1.5rem;
+            font-size: 0.88rem;
+            line-height: 1.85;
+            color: var(--ink2);
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        /* ─── Completion Banner ─── */
+        .completion-banner {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 1rem 1.4rem;
+            background: rgba(0, 229, 200, 0.06);
+            border: 1px solid rgba(0, 229, 200, 0.2);
+            border-radius: var(--r2);
+            margin-bottom: 14px;
+        }
+
+        .completion-banner.visible {
+            display: flex;
+        }
+
+        .completion-check {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--cyan-dim);
+            border: 1px solid var(--cyan-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cyan);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .completion-text {
+            flex: 1;
+        }
+
+        .completion-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--cyan);
+            margin-bottom: 0.1rem;
+        }
+
+        .completion-sub {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            color: var(--ink3);
+        }
+
+        .download-btn {
+            padding: 0.55rem 1.1rem;
+            background: var(--cyan-dim);
+            border: 1px solid rgba(0, 229, 200, 0.25);
+            border-radius: var(--r);
+            color: var(--cyan);
+            font-family: var(--sans);
+            font-weight: 700;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+
+        .download-btn:hover {
+            background: rgba(0, 229, 200, 0.18);
+            transform: translateY(-1px);
+        }
+
+        /* ─── Error Banner ─── */
+        .error-banner {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 1rem 1.4rem;
+            background: rgba(255, 77, 106, 0.06);
+            border: 1px solid rgba(255, 77, 106, 0.2);
+            border-radius: var(--r2);
+            margin-top: 1.2rem;
+            font-size: 0.85rem;
+            color: var(--crimson);
+            font-family: var(--mono);
+        }
+
+        .error-banner.visible {
+            display: flex;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════════════ */
+        .footer {
+            margin-top: 5rem;
+            text-align: center;
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            color: var(--ink3);
+            letter-spacing: 0.1em;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════════ */
+        @media (max-width: 720px) {
+            .stages-track {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page {
+                padding: 0 1.2rem 4rem;
+            }
+
+            .hero {
+                padding: 4rem 0 2.5rem;
+            }
+        }
+
+        @media (max-width: 440px) {
+            .stages-track {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Animated star-field background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="page">
+
+        <!-- ─── HERO ─────────────────────────────────────────────────── -->
+        <header class="hero">
+            <div class="hero-badge">MULTI-AGENT &nbsp;·&nbsp; RESEARCH SYSTEM</div>
+            <h1 class="hero-title">Research<em>Mind</em></h1>
+            <p class="hero-sub">
+                Four autonomous AI agents — search, scrape, write, critique —
+                working in sequence to deliver a publication-ready research report.
+            </p>
+
+            <!-- Search input -->
+            <div class="search-wrap">
+                <div class="search-box">
+                    <span class="search-icon">⌕</span>
+                    <input id="topic-input" type="text" placeholder="Enter any research topic…" autocomplete="off"
+                        spellcheck="false" />
+                    <button class="run-btn" id="run-btn" disabled>Launch Pipeline</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ─── PIPELINE TRACK ───────────────────────────────────────── -->
+        <section class="pipeline-section">
+            <div class="section-label">Pipeline stages</div>
+
+            <div class="stages-track">
+                <div class="stage-card pending" id="stage-1">
+                    <span class="stage-status status-pending" id="badge-1">pending</span>
+                    <span class="stage-icon">🔍</span>
+                    <div class="stage-num">STAGE 01</div>
+                    <div class="stage-name">Web Search</div>
+                    <div class="stage-desc">Agent queries web for recent, reliable sources</div>
+                </div>
+                <div class="stage-card pending" id="stage-2">
+                    <span class="stage-status status-pending" id="badge-2">pending</span>
+                    <span class="stage-icon">🕸️</span>
+                    <div class="stage-num">STAGE 02</div>
+                    <div class="stage-name">Content Scrape</div>
+                    <div class="stage-desc">Agent extracts full text from top URL</div>
+                </div>
+                <div class="stage-card pending" id="stage-3">
+                    <span class="stage-status status-pending" id="badge-3">pending</span>
+                    <span class="stage-icon">✍️</span>
+                    <div class="stage-num">STAGE 03</div>
+                    <div class="stage-name">Report Write</div>
+                    <div class="stage-desc">Writer chain synthesises structured report</div>
+                </div>
+                <div class="stage-card pending" id="stage-4">
+                    <span class="stage-status status-pending" id="badge-4">pending</span>
+                    <span class="stage-icon">🧠</span>
+                    <div class="stage-num">STAGE 04</div>
+                    <div class="stage-name">Critical Review</div>
+                    <div class="stage-desc">Critic evaluates accuracy &amp; depth</div>
+                </div>
+            </div>
+
+            <div class="progress-wrap">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <div class="cooldown-bar" id="cooldown-bar">
+                <span class="cooldown-label" id="cooldown-msg">Cooling down…</span>
+                <div class="cooldown-track">
+                    <div class="cooldown-fill" id="cooldown-fill"></div>
+                </div>
+            </div>
+
+            <p class="status-line" id="status-line">Enter a topic and launch the pipeline to begin.</p>
+        </section>
+
+        <!-- ─── ERROR ────────────────────────────────────────────────── -->
+        <div class="error-banner" id="error-banner">
+            ⚠ &nbsp;<span id="error-msg">An error occurred.</span>
+        </div>
+
+        <!-- ─── RESULTS ──────────────────────────────────────────────── -->
+        <section class="results-section" id="results-section">
+
+            <div class="completion-banner" id="completion-banner">
+                <div class="completion-check">✓</div>
+                <div class="completion-text">
+                    <div class="completion-title">Pipeline complete — all 4 stages finished</div>
+                    <div class="completion-sub" id="completion-sub">—</div>
+                </div>
+                <button class="download-btn" id="download-btn">⬇ Download .md</button>
+            </div>
+
+            <!-- Raw outputs (collapsible) -->
+            <div class="result-grid">
+                <div class="result-card" id="card-search">
+                    <div class="result-card-header" onclick="toggleCard('card-search')">
+                        <span class="result-card-icon">🔍</span>
+                        <span class="result-card-title">Search Results</span>
+                        <span class="result-card-tag">RAW OUTPUT</span>
+                        <span class="result-card-chevron">▾</span>
+                    </div>
+                    <div class="result-card-body">
+                        <div class="result-card-content" id="content-search">—</div>
+                    </div>
+                </div>
+                <div class="result-card" id="card-scrape">
+                    <div class="result-card-header" onclick="toggleCard('card-scrape')">
+                        <span class="result-card-icon">🕸️</span>
+                        <span class="result-card-title">Scraped Content</span>
+                        <span class="result-card-tag">RAW OUTPUT</span>
+                        <span class="result-card-chevron">▾</span>
+                    </div>
+                    <div class="result-card-body">
+                        <div class="result-card-content" id="content-scrape">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report -->
+            <div class="report-card" id="card-report">
+                <div class="report-card-header">
+                    <span style="font-size:1.2rem">✍️</span>
+                    <h2>Generated Report</h2>
+                </div>
+                <div class="report-card-body" id="content-report">—</div>
+            </div>
+
+            <!-- Critique -->
+            <div class="critique-card" id="card-critique">
+                <div class="critique-card-header">
+                    <span style="font-size:1.2rem">🧠</span>
+                    <h2>Critical Review</h2>
+                </div>
+                <div class="critique-card-body" id="content-critique">—</div>
+            </div>
+
+        </section>
+
+        <footer class="footer">RESEARCHMIND &nbsp;·&nbsp; MULTI-AGENT AI &nbsp;·&nbsp; POWERED BY FASTAPI</footer>
+    </div>
+
+    <script>
+        /* ═══════════════════════════════════════════════════════════════
+           STAR-FIELD CANVAS
+        ═══════════════════════════════════════════════════════════════ */
+        (function () {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let W, H, stars;
+
+            function resize() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+            }
+
+            function makeStars(n) {
+                return Array.from({ length: n }, () => ({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    r: Math.random() * 1.1,
+                    a: Math.random(),
+                    da: (Math.random() - 0.5) * 0.003,
+                }));
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+
+                // Subtle radial aurora
+                const grad = ctx.createRadialGradient(W * 0.5, 0, 0, W * 0.5, 0, H * 0.7);
+                grad.addColorStop(0, 'rgba(0,229,200,0.03)');
+                grad.addColorStop(0.5, 'rgba(0,60,120,0.04)');
+                grad.addColorStop(1, 'transparent');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+
+                for (const s of stars) {
+                    s.a += s.da;
+                    if (s.a < 0.05 || s.a > 1) s.da *= -1;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(200,220,255,${s.a})`;
+                    ctx.fill();
+                }
+                requestAnimationFrame(draw);
+            }
+
+            resize();
+            stars = makeStars(220);
+            draw();
+            window.addEventListener('resize', () => { resize(); stars = makeStars(220); });
+        })();
+
+        /* ═══════════════════════════════════════════════════════════════
+           UI STATE
+        ═══════════════════════════════════════════════════════════════ */
+        const $ = id => document.getElementById(id);
+
+        const input = $('topic-input');
+        const runBtn = $('run-btn');
+        const statusEl = $('status-line');
+        const progFill = $('progress-fill');
+        const cdBar = $('cooldown-bar');
+        const cdMsg = $('cooldown-msg');
+        const cdFill = $('cooldown-fill');
+        const errBanner = $('error-banner');
+        const errMsg = $('error-msg');
+
+        let state = {
+            search: '', scrape: '', report: '', critique: '', topic: ''
+        };
+
+        // Enable button when input has text
+        input.addEventListener('input', () => {
+            runBtn.disabled = !input.value.trim();
+        });
+
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && input.value.trim()) launchPipeline();
+        });
+
+        runBtn.addEventListener('click', launchPipeline);
+
+        /* ── Stage helpers ─────────────────────────────────────────── */
+        const PROGRESS = [0, 0.08, 0.3, 0.55, 0.78, 1];
+
+        function setStage(n, status) {
+            // status: 'pending' | 'active' | 'cooldown' | 'done'
+            const card = $(`stage-${n}`);
+            const badge = $(`badge-${n}`);
+            card.className = `stage-card ${status}`;
+            badge.className = `stage-status status-${status}`;
+            badge.textContent = status === 'done' ? '✓ done' : status === 'cooldown' ? '⏳ wait' : status === 'active' ? '● running' : 'pending';
+        }
+
+        function setProgress(pct) {
+            progFill.style.width = (pct * 100) + '%';
+        }
+
+        function setStatus(msg, cls = '') {
+            statusEl.className = 'status-line ' + cls;
+            statusEl.textContent = msg;
+        }
+
+        function startCooldown(secs, msg) {
+            cdMsg.textContent = `⏳ ${msg} (${secs}s)`;
+            cdBar.classList.add('visible');
+            cdFill.style.width = '100%';
+            // Animate down
+            requestAnimationFrame(() => {
+                cdFill.style.transition = `width ${secs}s linear`;
+                cdFill.style.width = '0%';
+            });
+        }
+
+        function stopCooldown() {
+            cdBar.classList.remove('visible');
+            cdFill.style.transition = 'none';
+            cdFill.style.width = '100%';
+        }
+
+        function showResult(cardId, content) {
+            const card = $(cardId);
+            card.classList.add('visible');
+            // small delay so transition fires
+            setTimeout(() => card.classList.add('expanded'), 120);
+        }
+
+        function toggleCard(cardId) {
+            $(cardId).classList.toggle('expanded');
+        }
+
+        function resetUI() {
+            for (let i = 1; i <= 4; i++) setStage(i, 'pending');
+            setProgress(0);
+            stopCooldown();
+            setStatus('Pipeline running…', 'active');
+            errBanner.classList.remove('visible');
+            $('completion-banner').classList.remove('visible');
+
+            ['card-search', 'card-scrape', 'card-report', 'card-critique'].forEach(id => {
+                const el = $(id);
+                el.classList.remove('visible', 'expanded');
+            });
+            ['content-search', 'content-scrape', 'content-report', 'content-critique'].forEach(id => {
+                $(id).textContent = '—';
+            });
+            state = { search: '', scrape: '', report: '', critique: '', topic: input.value.trim() };
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           PIPELINE LAUNCH
+        ═══════════════════════════════════════════════════════════════ */
+        async function launchPipeline() {
+            const topic = input.value.trim();
+            if (!topic) return;
+
+            resetUI();
+            runBtn.disabled = true;
+
+            try {
+                const resp = await fetch('http://localhost:8000/research', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic }),
+                });
+
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+
+                    const frames = buffer.split('\n\n');
+                    buffer = frames.pop();
+
+                    for (const frame of frames) {
+                        if (!frame.trim()) continue;
+                        const lines = frame.split('\n');
+                        let evtType = '', evtData = '';
+                        for (const l of lines) {
+                            if (l.startsWith('event: ')) evtType = l.slice(7).trim();
+                            if (l.startsWith('data: ')) evtData = l.slice(6).trim();
+                        }
+                        if (!evtType || !evtData) continue;
+                        handleEvent(evtType, JSON.parse(evtData));
+                    }
+                }
+            } catch (err) {
+                errMsg.textContent = err.message || 'Connection failed. Is the server running?';
+                errBanner.classList.add('visible');
+                setStatus('Error — see banner above.', '');
+            } finally {
+                runBtn.disabled = false;
+            }
+        }
+
+        /* ── SSE event handler ────────────────────────────────────── */
+        function handleEvent(type, data) {
+            switch (type) {
+
+                case 'status': {
+                    const n = data.stage;
+                    // Mark previous stages done
+                    for (let i = 1; i < n; i++) setStage(i, 'done');
+                    setStage(n, 'active');
+                    setProgress(PROGRESS[n - 1]);
+                    setStatus(`Stage ${n} · ${data.message}`, 'active');
+                    stopCooldown();
+                    break;
+                }
+
+                case 'cooldown': {
+                    setStatus(`⏳ ${data.message}`, 'cooldown');
+                    startCooldown(data.seconds, data.message);
+                    break;
+                }
+
+                case 'result': {
+                    const { stage, key, content } = data;
+                    setStage(stage, 'done');
+                    setProgress(PROGRESS[stage]);
+                    stopCooldown();
+
+                    if (key === 'search') {
+                        state.search = content;
+                        $('content-search').textContent = content;
+                        showResult('card-search', content);
+                    } else if (key === 'scrape') {
+                        state.scrape = content;
+                        $('content-scrape').textContent = content;
+                        showResult('card-scrape', content);
+                    } else if (key === 'report') {
+                        state.report = content;
+                        $('content-report').textContent = content;
+                        showResult('card-report', content);
+                    } else if (key === 'critique') {
+                        state.critique = content;
+                        $('content-critique').textContent = content;
+                        showResult('card-critique', content);
+                    }
+                    break;
+                }
+
+                case 'done': {
+                    setProgress(1);
+                    setStatus('Pipeline complete — all 4 stages finished ✓', '');
+                    stopCooldown();
+
+                    const banner = $('completion-banner');
+                    banner.classList.add('visible');
+                    $('completion-sub').textContent = `Topic: "${state.topic}"`;
+                    setupDownload();
+                    break;
+                }
+
+                case 'error': {
+                    errMsg.textContent = data.message;
+                    errBanner.classList.add('visible');
+                    setStatus('Pipeline encountered an error.', '');
+                    break;
+                }
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           DOWNLOAD
+        ═══════════════════════════════════════════════════════════════ */
+        function setupDownload() {
+            $('download-btn').onclick = () => {
+                const md = [
+                    `# Research Report: ${state.topic}`,
+                    '',
+                    `## Report`,
+                    state.report,
+                    '',
+                    `## Critical Review`,
+                    state.critique,
+                ].join('\n');
+
+                const blob = new Blob([md], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = Object.assign(document.createElement('a'), {
+                    href: url,
+                    download: `research_${state.topic.slice(0, 30).replace(/\s+/g, '_')}.md`
+                });
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            };
+        }
+    </script>
+</body>
+
+</html>
